@@ -2,7 +2,7 @@ package main
 
 import (
     "fmt"
-    "io/ioutil"
+    "io"
     "log"
     "net/http"
     "os"
@@ -16,10 +16,14 @@ func main() {
         os.Exit(1)
     }
 
-    responseData, err := ioutil.ReadAll(response.Body)
+    defer response.Body.Close()
+
+    responseData, err := io.ReadAll(response.Body)
     if err != nil {
         log.Fatal(err)
     }
+
+
     fmt.Println(string(responseData))
 
 }
