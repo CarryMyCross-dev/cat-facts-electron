@@ -1,14 +1,22 @@
-package main
+package catfacts
 
 import (
     "fmt"
-    "io"
-    "log"
     "net/http"
     "os"
+    "encoding/json"
 )
 
-func main() {
+type CatFactResponse struct {
+    ID string   `json:"id"`
+    URL string  `json:"url"`
+    Width int   `json:"width"`
+    Height   int           `json:"height"`
+    Breeds   []interface{} `json:"breeds"`
+    Favourite interface{}  `json:"favourite"`
+}
+
+func GetCatFacts() (CatFactResponse, error) {
     response, err := http.Get("https://api.thecatapi.com/v1/images/search")
 
     if err != nil {
@@ -16,14 +24,16 @@ func main() {
         os.Exit(1)
     }
 
+    // close the response since we are completed with our request
     defer response.Body.Close()
 
-    responseData, err := io.ReadAll(response.Body)
-    if err != nil {
-        log.Fatal(err)
+    //decode the json
+    var data []CatFactResponse
+    if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
+        fmt.Println("Error decoding JSON:", err)
+        os.Exit(1)
     }
 
-
-    fmt.Println(string(responseData))
-
+    // always going to have 1 item in the array. return it and the error
+    return data[0], nil
 }
